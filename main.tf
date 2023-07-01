@@ -67,7 +67,7 @@ resource "abbey_grant_kit" "tabular_pii_role_membership" {
   output = {
     location = "github://organization/repo/access.tf"
     append = <<-EOT
-      resource "tabular_role_membership" "example_members" {
+      resource "tabular_role_membership" "pii_members" {
         role_name     = tabular_role.pii_role.name
         admin_members = ["replace-me-admin@example.com"]
         members       = ["replace-me@example.com"]
