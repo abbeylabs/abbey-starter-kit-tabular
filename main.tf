@@ -87,9 +87,9 @@ resource "abbey_identity" "user_1" {
       }
     ]
 
-    confluent = [
+    tabular = [
       {
-        principal = "replaceme"
+        user = "replace-me@example.com"
       }
     ]
   })
