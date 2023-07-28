@@ -10,7 +10,7 @@ terraform {
   required_providers {
     abbey = {
       source = "abbeylabs/abbey"
-      version = "0.2.2"
+      version = "0.2.4"
     }
 
     tabular = {
@@ -48,22 +48,9 @@ resource "abbey_grant_kit" "tabular_pii_role_membership" {
     ]
   }
 
-  policies = {
-    grant_if = [
-      {
-        query = <<-EOT
-          package main
-
-          import data.abbey.functions
-
-          allow[msg] {
-            true; functions.expire_after("24h")
-            msg := "granting access for 24 hours"
-          }
-        EOT
-      }
-    ]
-  }
+  policies = [
+    { bundle = "github://organization/repo/policies" }
+  ]
 
   output = {
     location = "github://organization/repo/access.tf"
@@ -78,20 +65,11 @@ resource "abbey_grant_kit" "tabular_pii_role_membership" {
 }
 
 resource "abbey_identity" "user_1" {
-  name = "replace-me"
-
-  linked = jsonencode({
-    abbey = [
-      {
-        type  = "AuthId"
-        value = "replace-me@example.com"
-      }
-    ]
-
-    tabular = [
-      {
-        user = "replace-me@example.com"
-      }
-    ]
-  })
+  abbey_account = "replace-me@example.com"
+  source = "tabular"
+  metadata = jsonencode(
+    {
+      user = "replace-me@example.com"
+    }
+  )
 }
