@@ -1,33 +1,11 @@
-terraform {
-  backend "http" {
-    address        = "https://api.abbey.io/terraform-http-backend"
-    lock_address   = "https://api.abbey.io/terraform-http-backend/lock"
-    unlock_address = "https://api.abbey.io/terraform-http-backend/unlock"
-    lock_method    = "POST"
-    unlock_method  = "POST"
-  }
+locals {
+  account_name = ""
+  repo_name = ""
 
-  required_providers {
-    abbey = {
-      source = "abbeylabs/abbey"
-      version = "0.2.4"
-    }
+  project_path = "github://${local.account_name}/${local.repo_name}"
+  policies_path = "${local.project_path}/policies"
 
-    tabular = {
-      source = "tabular-io/tabular"
-      version = "0.0.11"
-    }
-  }
-}
-
-provider "abbey" {
-  # Configuration options
-  bearer_auth = var.abbey_token
-}
-
-provider "tabular" {
-  # Configuration options
-  credential = var.tabular_credential
+  admin_email = ""
 }
 
 resource "tabular_role" "pii_role" {
@@ -49,27 +27,17 @@ resource "abbey_grant_kit" "tabular_pii_role_membership" {
   }
 
   policies = [
-    { bundle = "github://organization/repo/policies" }
+    { bundle = local.policies_path }
   ]
 
   output = {
-    location = "github://organization/repo/access.tf"
+    location = "${local.project_path}/access.tf"
     append = <<-EOT
       resource "tabular_role_membership" "pii_members" {
         role_name     = tabular_role.pii_role.name
-        admin_members = ["replace-me-admin@example.com"]
-        members       = ["replace-me@example.com"]
+        admin_members = [local.admin_email]
+        members       = ["{{ .user.email }}"]
       }
     EOT
   }
-}
-
-resource "abbey_identity" "user_1" {
-  abbey_account = "replace-me@example.com"
-  source = "tabular"
-  metadata = jsonencode(
-    {
-      user = "replace-me@example.com"
-    }
-  )
 }
